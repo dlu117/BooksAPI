@@ -95,10 +95,10 @@ namespace bookAPI.Controllers
                 return BadRequest("Invalid Book URL");
             }
 
-
+            //Add this book object to the database
             _context.Book.Add(book);
             await _context.SaveChangesAsync();
-
+            //Return success code and the info on the video object
             return CreatedAtAction("GetBook", new { id = book.BookId }, book);
         }
 
