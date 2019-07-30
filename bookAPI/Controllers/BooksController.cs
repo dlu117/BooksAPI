@@ -127,6 +127,35 @@ namespace bookAPI.Controllers
             return CreatedAtAction("GetBook", new { id = book.BookId }, book);
         }
 
+        //Search by Word
+
+        // GET api/Bookss/SearchByWordss/
+        [HttpGet("SearchByWords/{searchString}")]
+        public async Task<ActionResult<IEnumerable<Book>>> Search(string searchString)
+        {
+             if (String.IsNullOrEmpty(searchString))
+            {
+                return BadRequest("Search string cannot be null or empty.");
+            }
+
+            // Choose descriptions that has the word 
+            var books = await _context.Book.Include(book => book.Word).Select(book => new Book {
+                BookId = book.BookId,
+                BookTitle = book.BookTitle,
+                BookAuthor = book.BookAuthor,
+                WebUrl = book.WebUrl,
+                BookPages = book.BookPages,
+                ThumbnailUrl = book.ThumbnailUrl,
+                IsRead = book.IsRead,
+                Word = book.Word.Where(dec => dec.Word1.Contains(searchString)).ToList()
+            }).ToListAsync();
+
+            // Removes all videos with empty transcription
+            books.RemoveAll(book => book.Word.Count == 0);
+            return Ok(books);
+        }
+
+
         // DELETE: api/Books/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Book>> DeleteBook(int id)

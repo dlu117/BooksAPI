@@ -33,6 +33,7 @@ namespace bookAPI
                 c.SwaggerDoc("v1", new Info { Title = "My book API", Version = "v1" });
             });
 
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddJsonOptions(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddDbContext<bookAPIContext>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
