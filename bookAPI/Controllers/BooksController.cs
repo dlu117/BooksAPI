@@ -98,6 +98,31 @@ namespace bookAPI.Controllers
             //Add this book object to the database
             _context.Book.Add(book);
             await _context.SaveChangesAsync();
+
+            // Get the primary key of the newly created book record in the database
+            int id = book.BookId;
+            //Construct seperate thread
+            bookAPIContext tempcontext = new bookAPIContext();
+            WordsController wordscontroller = new WordsController(tempcontext);
+
+            //Executed in background
+            Task addWords = Task.Run(async () =>
+            {   
+                //Get list of words from GoogleHelper
+                List<Word> words = new List<Word>();
+
+                words = GoogleBooksHelper.GetWords(bookId);
+
+
+                for (int i = 0; i < words.Count; i++)
+                {
+                    Word word = words.ElementAt(i);
+                    word.BookId = id;
+                    await wordscontroller.PostWord(word);                
+                }
+
+            });
+      
             //Return success code and the info on the video object
             return CreatedAtAction("GetBook", new { id = book.BookId }, book);
         }
