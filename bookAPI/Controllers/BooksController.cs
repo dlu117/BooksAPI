@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using bookAPI.Model;
 using bookAPI.Helper;
+using bookAPI.DAL;
+using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace bookAPI.Controllers
 {
@@ -14,11 +17,16 @@ namespace bookAPI.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        private readonly bookAPIContext _context;
 
-        public BooksController(bookAPIContext context)
+        private readonly bookAPIContext _context;
+        private readonly IMapper _mapper;
+        private IBookRepository bookRepository;
+
+        public BooksController(bookAPIContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
+            this.bookRepository = new BookRepository(new bookAPIContext());
         }
 
         // GET: api/Books
@@ -40,6 +48,24 @@ namespace bookAPI.Controllers
             }
 
             return book;
+        }
+
+        //PUT with PATCH to handle isFavourite
+        [HttpPatch("update/{id}")]
+        public BookDTO Patch(int id, [FromBody]JsonPatchDocument<BookDTO> bookPatch)
+        {
+            //get original book object from the database
+            Book originVideo = bookRepository.GetBookByID(id);
+            //use automapper to map that to DTO object
+            BookDTO bookDTO = _mapper.Map<BookDTO>(originVideo);
+            //apply the patch to that DTO
+            bookPatch.ApplyTo(bookDTO);
+            //use automapper to map the DTO back ontop of the database object
+            _mapper.Map(bookDTO, originVideo);
+            //update book in the database
+            _context.Update(originVideo);
+            _context.SaveChanges();
+            return bookDTO;
         }
 
         // PUT: api/Books/5
