@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
+using AutoMapper;
 
 namespace bookAPI
 {
@@ -32,7 +33,7 @@ namespace bookAPI
             {
                 c.SwaggerDoc("v1", new Info { Title = "My book API", Version = "v1" });
             });
-
+            services.AddAutoMapper(typeof(Startup));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddJsonOptions(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddDbContext<bookAPIContext>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
