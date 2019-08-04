@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.Serialization;
 
 namespace bookAPI.Model
 {
@@ -35,31 +34,4 @@ namespace bookAPI.Model
         [InverseProperty("Book")]
         public virtual ICollection<Word> Word { get; set; }
     }
-    [DataContract]
-    // DTO defines what part of object that is sent to user
-    // Here still allow user to see everything 
-    public class BookDTO
-    {
-        [DataMember]
-        public int BookId { get; set; }
-
-        [DataMember]
-        public string BookTitle { get; set; }
-
-        [DataMember]
-        public string BookAuthor { get; set; }
-
-        [DataMember]
-        public int BookPages { get; set; }
-
-        [DataMember]
-        public string WebUrl { get; set; }
-
-        [DataMember]
-        public string ThumbnailUrl { get; set; }
-
-        [DataMember]
-        public bool IsRead { get; set; }
-    }
-
 }

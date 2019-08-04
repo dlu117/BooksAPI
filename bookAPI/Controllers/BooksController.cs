@@ -7,9 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using bookAPI.Model;
 using bookAPI.Helper;
-using bookAPI.DAL;
-using AutoMapper;
-using Microsoft.AspNetCore.JsonPatch;
 
 namespace bookAPI.Controllers
 {
@@ -17,16 +14,11 @@ namespace bookAPI.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-
         private readonly bookAPIContext _context;
-        private readonly IMapper _mapper;
-        private IBookRepository bookRepository;
 
-        public BooksController(bookAPIContext context, IMapper mapper)
+        public BooksController(bookAPIContext context)
         {
             _context = context;
-            _mapper = mapper;
-            this.bookRepository = new BookRepository(new bookAPIContext());
         }
 
         // GET: api/Books
@@ -48,24 +40,6 @@ namespace bookAPI.Controllers
             }
 
             return book;
-        }
-
-        //PUT with PATCH to handle isFavourite
-        [HttpPatch("update/{id}")]
-        public BookDTO Patch(int id, [FromBody]JsonPatchDocument<BookDTO> bookPatch)
-        {
-            //get original book object from the database
-            Book originVideo = bookRepository.GetBookByID(id);
-            //use automapper to map that to DTO object
-            BookDTO bookDTO = _mapper.Map<BookDTO>(originVideo);
-            //apply the patch to that DTO
-            bookPatch.ApplyTo(bookDTO);
-            //use automapper to map the DTO back ontop of the database object
-            _mapper.Map(bookDTO, originVideo);
-            //update book in the database
-            _context.Update(originVideo);
-            _context.SaveChanges();
-            return bookDTO;
         }
 
         // PUT: api/Books/5
@@ -98,13 +72,12 @@ namespace bookAPI.Controllers
             return NoContent();
         }
 
-        // data input is a string (url string)
         public class URLDTO {
             public String URL { get; set; }
         }
 
         
-        // POST: api/Books modified so takes a url string instead of a word object
+        // POST: api/Books
         [HttpPost]
         public async Task<ActionResult<Book>> PostBook([FromBody]URLDTO data)
         {
@@ -113,8 +86,8 @@ namespace bookAPI.Controllers
             String bookId;
             try
             {
-                bookURL = data.URL; //get the url
-                bookId = GoogleBooksHelper.GetbookIdFromURL(bookURL); 
+                bookURL = data.URL;
+                bookId = GoogleBooksHelper.GetbookIdFromURL(bookURL);
                 book = GoogleBooksHelper.GetBookInfo(bookId, bookURL);
             }
             catch
@@ -123,7 +96,7 @@ namespace bookAPI.Controllers
             }
 
             //Add this book object to the database
-            _context.Book.Add(book);  // Book Repository Documentation/ Book Repo 
+            _context.Book.Add(book);
             await _context.SaveChangesAsync();
 
             // Get the primary key of the newly created book record in the database
@@ -141,7 +114,7 @@ namespace bookAPI.Controllers
                 words = GoogleBooksHelper.GetWords(bookId);
 
 
-                for (int i = 0; i < words.Count; i++)   
+                for (int i = 0; i < words.Count; i++)
                 {
                     Word word = words.ElementAt(i);
                     word.BookId = id;
@@ -156,7 +129,7 @@ namespace bookAPI.Controllers
 
         //Search by Word
 
-        // GET api/Bookss/SearchByWords/
+        // GET api/Bookss/SearchByWordss/
         [HttpGet("SearchByWords/{searchString}")]
         public async Task<ActionResult<IEnumerable<Book>>> Search(string searchString)
         {
