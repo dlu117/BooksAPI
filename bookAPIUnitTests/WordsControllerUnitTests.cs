@@ -39,12 +39,15 @@ namespace UnitTestbookAPI
           };
 
 
+        // Words unit testing pretty generic as scaffolding will generally mean they will work
+        // More interesting edge cases in 
+
         [TestInitialize]
         public void SetupDb()
         {
             using (var context = new bookAPIContext(options))
             {
-                // populate the db
+                // populate the mock db
                 context.Word.Add(words[0]);
                 context.Word.Add(words[1]);
                 context.Word.Add(words[2]);
@@ -72,7 +75,7 @@ namespace UnitTestbookAPI
                 WordsController wordsController = new WordsController(context);
                 ActionResult<IEnumerable<Word>> result = await wordsController.GetWord();
                 Assert.IsNotNull(result);          // check not empty word list
-                Assert.AreEqual(words.Count, 3);    // check 3 elements in word list
+                Assert.AreEqual(context.Word.Count(), 3);    // check 3 elements in word list
             }
         }
 
@@ -91,5 +94,53 @@ namespace UnitTestbookAPI
 
                 Assert.IsNotNull(result);
                 Assert.IsInstanceOfType(result, typeof(NoContentResult)); // Put returns no content
+
+
             }
         }
+
+        [TestMethod]
+        public async Task TestDeleteWord()
+        {
+            using (var context = new bookAPIContext(options))
+            {
+                WordsController wordsController = new WordsController(context);
+                ActionResult<Word> result = await wordsController.DeleteWord(words[0].WordId);
+                Assert.IsNotNull(result);
+                // not use Assert.AreEqual(4,words.Count); Words.Count will always be 3 whereas context.Word.Count() will check length of db of the context
+                Assert.AreEqual(context.Word.Count(), 2);
+            }
+        }
+
+
+
+        [TestMethod]
+        public async Task TestPostWord()
+        {
+            using (var context = new bookAPIContext(options))
+            {
+                Word newword = new Word
+                {
+                    Word1 = "Spell"
+                };
+                WordsController wordsController = new WordsController(context);
+                ActionResult<Word> result = await wordsController.PostWord(newword);
+                Assert.IsNotNull(result);
+                Assert.AreEqual(context.Word.Count(), 4);
+
+
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+    }
+
+}
