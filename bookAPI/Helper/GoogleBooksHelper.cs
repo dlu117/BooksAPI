@@ -13,7 +13,7 @@ namespace bookAPI.Helper
     {
         public static void testProgram()
         {
-            //Console.WriteLine(GetBookInfo(GetbookIdFromURL("https://books.google.co.nz/books?id=jk87_y-ubE0C&printsec=frontcover&dq=harry+potter&hl=en&sa=X&ved=0ahUKEwip37CggNrjAhWOA3IKHcyJBIgQ6AEIKjAA#v=onepage&q=harry%20potter&f=false"), "https://books.google.co.nz/books?id=jk87_y-ubE0C&printsec=frontcover&dq=harry+potter&hl=en&sa=X&ved=0ahUKEwip37CggNrjAhWOA3IKHcyJBIgQ6AEIKjAA#v=onepage&q=harry%20potter&f=false"));
+            Console.WriteLine(GetBookInfo(GetbookIdFromURL("https://books.google.co.nz/books?id=jk87_y-ubE0C&printsec=frontcover&dq=harry+potter&hl=en&sa=X&ved=0ahUKEwip37CggNrjAhWOA3IKHcyJBIgQ6AEIKjAA#v=onepage&q=harry%20potter&f=false"), "https://books.google.co.nz/books?id=jk87_y-ubE0C&printsec=frontcover&dq=harry+potter&hl=en&sa=X&ved=0ahUKEwip37CggNrjAhWOA3IKHcyJBIgQ6AEIKjAA#v=onepage&q=harry%20potter&f=false"));
 
             Console.WriteLine(GetWords(GetbookIdFromURL("https://books.google.co.nz/books?id=iO5pApw2JycC&printsec=frontcover&dq=harry+potter&hl=en&sa=X&ved=0ahUKEwj4g4vw7tvjAhUSheYKHbmxAqwQ6AEIMDAB#v=onepage&q=harry%20potter&f=false")));
             // Pause the program execution
@@ -90,6 +90,9 @@ namespace bookAPI.Helper
 
         }
 
+        // Remove duplicate words in Google Book Solution
+        // Eg "Harry" may appear in Google Book Description more than once
+
         public static List<Word> GetWords(String bookId)
        {
             String descriptionstring = GetDescriptionString(bookId);
@@ -100,10 +103,27 @@ namespace bookAPI.Helper
             {
                 if(descriptions[i] != "")
                 {
-                    Word word = new Word {
+                    Word word = new Word
+                    {
                         Word1 = descriptions[i]
                     };
-                 words.Add(word);
+
+                    // note to self: if(!words.Contains(word) will not work here) need to compare word1 not word object
+
+                    int test = 0;
+                    for (int j = 0; j < words.Count; j++)
+                    {
+                     if(words[j].Word1 == descriptions[i])
+                        {
+                            test = 1;   // word already exists in word database
+                        }
+
+                    }
+                    if(test != 1)      // if word not in database then add it to words
+                    {
+                        words.Add(word);
+                    }
+
                 }
                
             }
