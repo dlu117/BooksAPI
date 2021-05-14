@@ -1,5 +1,5 @@
 # BookWorm Web App API Backend
-API endpoint: https://bookapidevops.azurewebsites.net
+
 
 ## Relational Database
 Used Google Books API, below is my database schemea.
